@@ -1,6 +1,5 @@
 name: build and deploy
 
-# 当 master 分支 push 代码的时候触发 workflow
 on:
   push:
     branches:
@@ -11,22 +10,19 @@ jobs:
     runs-on: ubuntu-latest
     
     permissions:
-      contents: read
+      contents: write
       pages: write
       id-token: write
     
     steps:
-    # 下载仓库代码
     - name: Checkout repository
       uses: actions/checkout@v4
     
-    # 设置 Node.js 环境
     - name: Setup Node.js
       uses: actions/setup-node@v4
       with:
         node-version: '20'
     
-    # 缓存依赖
     - name: Cache dependencies
       uses: actions/cache@v4
       with:
@@ -35,18 +31,15 @@ jobs:
         restore-keys: |
           ${{ runner.os }}-node-
     
-    # 安装依赖
     - name: Install dependencies
       run: npm ci
     
-    # 打包构建
     - name: Build project
       run: npm run build
     
-    # 发布到 GitHub Pages
     - name: Deploy to GitHub Pages
       uses: peaceiris/actions-gh-pages@v4
       with:
-        github_token: ${{ secrets.HEXOBLOG }}
+        github_token: ${{ secrets.GITHUB_TOKEN }}
         publish_branch: gh-pages
         publish_dir: ./public

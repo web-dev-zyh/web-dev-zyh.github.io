@@ -9,13 +9,26 @@ on:
 jobs:
   build-deploy:
     runs-on: ubuntu-latest
+    
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+    
     steps:
     # 下载仓库代码
-    - uses: actions/checkout@v2
+    - name: Checkout repository
+      uses: actions/checkout@v4
+    
+    # 设置 Node.js 环境
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
     
     # 缓存依赖
     - name: Cache dependencies
-      uses: actions/cache@v1
+      uses: actions/cache@v4
       with:
         path: ~/.npm
         key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
@@ -23,15 +36,17 @@ jobs:
           ${{ runner.os }}-node-
     
     # 安装依赖
-    - run: npm ci
+    - name: Install dependencies
+      run: npm ci
     
     # 打包构建
-    - run: npm run build
+    - name: Build project
+      run: npm run build
     
     # 发布到 GitHub Pages
-    - name: Deploy
-      uses: peaceiris/actions-gh-pages@v2
-      env:
-        PERSONAL_TOKEN: ${{ secrets.HEXOBLOG }}
-        PUBLISH_BRANCH: gh-pages
-        PUBLISH_DIR: ./public
+    - name: Deploy to GitHub Pages
+      uses: peaceiris/actions-gh-pages@v4
+      with:
+        github_token: ${{ secrets.HEXOBLOG }}
+        publish_branch: gh-pages
+        publish_dir: ./public
